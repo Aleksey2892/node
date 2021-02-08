@@ -10,12 +10,11 @@ const contactsPath = path.normalize(
 const parseDataHandler = data => JSON.parse(data);
 const getContactsHandler = async () => {
   try {
-    let resData = await fs.readFile(contactsPath, 'utf-8', error => {
+    const resData = await fs.readFile(contactsPath, 'utf-8', error => {
       if (error) throw error;
     });
-    resData = parseDataHandler(resData);
 
-    return resData;
+    return parseDataHandler(resData);
   } catch (error) {
     throw error;
   }
