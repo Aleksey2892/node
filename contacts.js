@@ -1,46 +1,10 @@
-const fs = require('fs').promises;
-const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
-const contactsPath = path.normalize(
-  path.join(__dirname, './db', '/contacts.json'),
-);
-
-/* function handlers start */
-const parseDataHandler = data => JSON.parse(data);
-const getContactsHandler = async () => {
-  try {
-    const resData = await fs.readFile(contactsPath, 'utf-8', error => {
-      if (error) throw error;
-    });
-
-    return parseDataHandler(resData);
-  } catch (error) {
-    throw error;
-  }
-};
-const findContactHandler = (contactId, contacts) => {
-  return contacts.find(contact => contact.id === contactId);
-};
-const updateContactsHandler = async contacts => {
-  try {
-    await fs.writeFile(
-      contactsPath,
-      JSON.stringify(contacts),
-      'utf-8',
-      error => {
-        if (error) throw error;
-      },
-    );
-  } catch (error) {
-    throw error;
-  }
-};
-/* function handlers end */
+const handlers = require('./helpers/handlerFunctions');
 
 const listContacts = async () => {
   try {
-    const contacts = await getContactsHandler();
+    const contacts = await handlers.getContacts();
 
     console.table(contacts);
   } catch (e) {
@@ -50,8 +14,8 @@ const listContacts = async () => {
 
 const getContactById = async contactId => {
   try {
-    const contacts = await getContactsHandler();
-    const searchResult = await findContactHandler(contactId, contacts);
+    const contacts = await handlers.getContacts();
+    const searchResult = await handlers.findContact(contactId, contacts);
 
     if (!searchResult) {
       console.log(`Контакт с id: ${contactId} - не найден!`);
@@ -65,8 +29,8 @@ const getContactById = async contactId => {
 
 const removeContact = async contactId => {
   try {
-    const contacts = await getContactsHandler();
-    const targetContact = await findContactHandler(contactId, contacts);
+    const contacts = await handlers.getContacts();
+    const targetContact = await handlers.findContact(contactId, contacts);
 
     if (!targetContact) {
       console.log(`Ошибка удаления! Контакт с id: ${contactId} - не найден.`);
@@ -75,7 +39,7 @@ const removeContact = async contactId => {
         contact => contact.id !== contactId,
       );
 
-      await updateContactsHandler(contactsWithoutRemoved);
+      await handlers.updateContacts(contactsWithoutRemoved);
 
       console.log('Этот контакт был удален: ', targetContact);
     }
@@ -86,11 +50,11 @@ const removeContact = async contactId => {
 
 const addContact = async (name, email, phone) => {
   try {
-    const contacts = await getContactsHandler();
+    const contacts = await handlers.getContacts();
     const newContact = { id: uuidv4(), name, email, phone };
     contacts.push(newContact);
 
-    await updateContactsHandler(contacts);
+    await handlers.updateContacts(contacts);
 
     console.log('Добавлен новый контакт:', newContact);
   } catch (e) {
