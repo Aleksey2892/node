@@ -17,14 +17,7 @@ const findContact = (contactId, contacts) => {
 };
 const updateContacts = async contacts => {
   try {
-    await fs.writeFile(
-      contactsPath,
-      JSON.stringify(contacts),
-      'utf-8',
-      error => {
-        if (error) throw error;
-      },
-    );
+    await fs.writeFile(contactsPath, JSON.stringify(contacts), 'utf-8');
   } catch (error) {
     throw error;
   }
